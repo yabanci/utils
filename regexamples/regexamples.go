@@ -3,6 +3,7 @@ package regexamples
 
 import (
 	"fmt"
+	"math"
 	randv2 "math/rand/v2"
 	"regexp/syntax"
 	"strings"
@@ -41,6 +42,7 @@ func NewGenerator(pattern string) (*Generator, error) {
 // SetSeed resets the generator's random source to a deterministic seed,
 // which makes subsequent Generate calls produce the same sequence of strings.
 func (g *Generator) SetSeed(seed uint64) {
+	// #nosec G404 -- not used for security
 	g.rng = randv2.New(randv2.NewPCG(seed, seed))
 }
 
@@ -160,6 +162,9 @@ func (g *Generator) generate(re *syntax.Regexp, sb *strings.Builder) error {
 		}
 
 	case syntax.OpAlternate:
+		if len(re.Sub) == 0 {
+			return nil // empty alternation matches empty string
+		}
 		idx := g.rng.IntN(len(re.Sub))
 		if err := g.generate(re.Sub[idx], sb); err != nil {
 			return err
@@ -248,6 +253,10 @@ func (g *Generator) pickFromRanges(ranges []rune) rune {
 	for i := 0; i < len(ranges); i += 2 {
 		size := int(ranges[i+1]-ranges[i]) + 1
 		if n < size {
+			if n < 0 || n > math.MaxInt32 {
+				return 0
+			}
+
 			return ranges[i] + rune(n)
 		}
 
@@ -268,7 +277,12 @@ func countRunes(ranges []rune) int {
 }
 
 func (g *Generator) randPrintable() rune {
-	return printableMin + rune(g.rng.IntN(int(printableMax-printableMin+1)))
+	val := g.rng.IntN(int(printableMax - printableMin + 1))
+	if val < 0 || val > math.MaxInt32 {
+		return 0
+	}
+
+	return printableMin + rune(val)
 }
 
 func (g *Generator) randPrintableExcluding(exclude rune) rune {

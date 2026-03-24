@@ -212,13 +212,27 @@ func TestGeneratorSetSeed(t *testing.T) {
 
 	pattern := `[a-z]{5}-\d{3}`
 
-	g1, _ := NewGenerator(pattern)
-	g1.SetSeed(42)
-	results1, _ := g1.Generate(10)
+	g1, err := NewGenerator(pattern)
+	if err != nil {
+		t.Fatalf("NewGenerator: unexpected error: %v", err)
+	}
 
-	g2, _ := NewGenerator(pattern)
+	g1.SetSeed(42)
+	results1, err := g1.Generate(10)
+	if err != nil {
+		t.Fatalf("g1.Generate: unexpected error: %v", err)
+	}
+
+	g2, err := NewGenerator(pattern)
+	if err != nil {
+		t.Fatalf("NewGenerator: unexpected error: %v", err)
+	}
+
 	g2.SetSeed(42)
-	results2, _ := g2.Generate(10)
+	results2, err := g2.Generate(10)
+	if err != nil {
+		t.Fatalf("g2.Generate: unexpected error: %v", err)
+	}
 
 	for i := range results1 {
 		if results1[i] != results2[i] {

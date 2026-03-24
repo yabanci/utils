@@ -822,8 +822,7 @@ func runForkTest(t *testing.T) (stdout, stderr string, err error) {
 		t.Fatalf("Test name %q does not match expected format", t.Name())
 	}
 
-	inputCmd := os.Args[0]
-	cmd := exec.Command(inputCmd, "-test.run", testName)
+	cmd := exec.Command("go", "test", "-run", testName)
 	cmd.Env = append(os.Environ(), "FORK=1")
 
 	var stdoutBuf, stderrBuf bytes.Buffer

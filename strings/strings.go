@@ -186,15 +186,20 @@ func CaesarEncrypt(input string, shift int) string {
 		return ""
 	}
 
+	shift = shift % 26
+	if shift < 0 {
+		shift += 26
+	}
+
 	shifted := make([]byte, len(input))
 	for i := 0; i < len(input); i++ {
 		char := input[i]
 		shiftedChar := char
 
 		if char >= 'A' && char <= 'Z' {
-			shiftedChar = 'A' + (char-'A'+byte(shift))%26
+			shiftedChar = byte('A' + (int(char-'A')+shift)%26)
 		} else if char >= 'a' && char <= 'z' {
-			shiftedChar = 'a' + (char-'a'+byte(shift))%26
+			shiftedChar = byte('a' + (int(char-'a')+shift)%26)
 		}
 
 		shifted[i] = shiftedChar
